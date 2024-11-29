@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+        <!--扫描包-->
+        <context:component-scan base-package="com.gubingkun.service.impl"/>
+
+        <!--引入外部文件-->
+        <context:property-placeholder location="classpath*:*.properties"/>
+
+        <!--druid dataSource-->
+        <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+            <property name="driverClassName" value="${jdbc.driver}"></property>
+            <property name="url" value="${jdbc.url}"></property>
+            <property name="username" value="${jdbc.username}"></property>
+            <property name="password" value="${jdbc.password}"></property>
+        </bean>
+
+        <!--整合mybatis-->
+        <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sqlSessionFactory">
+            <!--配置数据源-->
+            <property name="dataSource" ref="dataSource"/>
+            <!--给实体类起别名-->
+            <property name="typeAliasesPackage" value="com.gubingkun.domain"/>
+            <!--配置分页插件-->
+            <property name="plugins">
+                <array>
+                    <bean class="com.github.pagehelper.PageHelper">
+                        <property name="properties">
+                            <value>dialect=mysql</value>
+                        </property>
+                    </bean>
+                </array>
+            </property>
+        </bean>
+
+        <!--整合mybatis-->
+        <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" id="mapperScannerConfigurer">
+            <property name="basePackage" value="com.gubingkun.dao"/>
+            <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+        </bean>
+
+        <!--基于xml的声明式事务控制-->
+        <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+            <property name="dataSource" ref="dataSource"/>
+        </bean>
+
+        <!--自动代理-->
+        <tx:annotation-driven transaction-manager="transactionManager"/>
+
+
+
+</beans>
